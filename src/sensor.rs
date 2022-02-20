@@ -1,9 +1,11 @@
-use btleplug::api::{Central, Characteristic, Peripheral as _};
-use btleplug::platform::{Adapter, Peripheral};
+use btleplug::api::{BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter};
+use btleplug::platform::{Adapter, Manager, Peripheral};
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::collections::BTreeSet;
 use std::fmt;
 use std::io::Cursor;
+use std::time::Duration;
+use tokio::time;
 
 pub use crate::protocol::*;
 
@@ -72,7 +74,7 @@ pub struct Sensor {
 }
 
 impl Sensor {
-    async fn find_sensor(central: &Adapter) -> Option<Peripheral> {
+    async fn find_sensor_by_name(central: &Adapter) -> Option<Peripheral> {
         for p in central.peripherals().await.unwrap() {
             if p.properties()
                 .await
@@ -87,8 +89,24 @@ impl Sensor {
         }
         None
     }
-    pub async fn init(central: &Adapter) -> Option<Sensor> {
-        let aranet = Sensor::find_sensor(central).await.expect("No lights found");
+    async fn find_sensor_by_addr(central: &Adapter, addr: &str) -> Option<Peripheral> {
+        let bdaddr = BDAddr::from_str_delim(addr).expect("Cannot parse Bluetooth Address");
+        for p in central.peripherals().await.unwrap() {
+            if p.properties().await.unwrap().unwrap().address.eq(&bdaddr) {
+                return Some(p);
+            }
+        }
+        None
+    }
+    async fn init(central: &Adapter, addr: Option<String>) -> Option<Sensor> {
+        let aranet = match addr {
+            Some(addr) => Sensor::find_sensor_by_addr(central, &addr)
+                .await
+                .expect("No sensor found"),
+            None => Sensor::find_sensor_by_name(central)
+                .await
+                .expect("No sensor found"),
+        };
 
         aranet.connect().await.expect("Could not connect");
         aranet
@@ -114,5 +132,32 @@ impl Sensor {
             .await
             .expect("Cannot read current values");
         SensorReadings::from_raw(vals)
+    }
+}
+
+pub struct SensorManager {}
+impl SensorManager {
+    pub async fn init(addr: Option<String>) -> Option<Sensor> {
+        let manager = Manager::new().await.unwrap();
+
+        // get the first bluetooth adapter
+        let central = manager
+            .adapters()
+            .await
+            .expect("Unable to fetch adapter list.")
+            .into_iter()
+            .next()
+            .expect("Unable to find adapters.");
+
+        central
+            .start_scan(ScanFilter::default())
+            .await
+            .expect("Cannot scan for devices");
+        time::sleep(Duration::from_secs(2)).await;
+
+        let sensor = Sensor::init(&central, addr)
+            .await
+            .expect("Could not create sensor");
+        Some(sensor)
     }
 }
