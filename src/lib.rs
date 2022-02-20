@@ -4,5 +4,6 @@
 pub mod protocol;
 pub use protocol::*;
 
+/// Sensor abstraction
 pub mod sensor;
 pub use sensor::*;

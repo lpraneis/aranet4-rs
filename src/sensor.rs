@@ -26,7 +26,8 @@ impl fmt::Display for SensorReadings {
 }
 
 impl SensorReadings {
-    pub fn from_raw(bytes: Vec<u8>) -> Option<SensorReadings> {
+    /// construct a `SensorReadings` from a raw bytestream retrieved from the sensor
+    fn from_raw(bytes: Vec<u8>) -> Option<SensorReadings> {
         let mut reader = Cursor::new(bytes);
         let co2_level = reader.read_u16::<LittleEndian>().unwrap();
         let temperature = reader.read_u16::<LittleEndian>().unwrap();
@@ -43,6 +44,26 @@ impl SensorReadings {
             battery,
             status_color,
         })
+    }
+    /// CO2 level, expressed in ppm
+    pub fn co2_level(&self) -> u16 {
+        self.co2_level
+    }
+    /// Temperature in Fahrenheit
+    pub fn temperature(&self) -> u16 {
+        self.temperature
+    }
+    /// Pressure in kpa
+    pub fn pressure(&self) -> u16 {
+        self.pressure
+    }
+    /// Humidity in percent humidity
+    pub fn humidity(&self) -> u8 {
+        self.humidity
+    }
+    /// Battery percent
+    pub fn battery(&self) -> u8 {
+        self.battery
     }
 }
 pub struct Sensor {
