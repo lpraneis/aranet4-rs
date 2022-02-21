@@ -9,6 +9,7 @@ use tokio::time;
 
 pub use crate::protocol::*;
 
+#[derive(Clone)]
 pub struct SensorReadings {
     co2_level: u16,
     temperature: u16,
@@ -28,6 +29,17 @@ impl fmt::Display for SensorReadings {
 }
 
 impl SensorReadings {
+    /// construct an empty set of readings. Can be used for displays, etc.
+    pub fn empty() -> SensorReadings {
+        SensorReadings {
+            co2_level: 0,
+            temperature: 0,
+            pressure: 0,
+            humidity: 0,
+            battery: 0,
+            status_color: 0,
+        }
+    }
     /// construct a `SensorReadings` from a raw bytestream retrieved from the sensor
     fn from_raw(bytes: Vec<u8>) -> Option<SensorReadings> {
         let mut reader = Cursor::new(bytes);
@@ -52,8 +64,8 @@ impl SensorReadings {
         self.co2_level
     }
     /// Temperature in Fahrenheit
-    pub fn temperature(&self) -> u16 {
-        self.temperature
+    pub fn temperature(&self) -> f32 {
+        (self.temperature as f32 * 1.8) + 32_f32
     }
     /// Pressure in kpa
     pub fn pressure(&self) -> u16 {
