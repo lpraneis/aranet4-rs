@@ -145,6 +145,21 @@ impl Sensor {
             .expect("Cannot read current values");
         SensorReadings::from_raw(vals)
     }
+    pub async fn last_update_time(&self) -> Duration {
+        let cmd_chars = self
+            .characteristics
+            .iter()
+            .find(|c| c.uuid == AranetService::READ_SECONDS_SINCE_UPDATE)
+            .expect("Unable to find characteristics");
+        let bytes = self
+            .aranet
+            .read(cmd_chars)
+            .await
+            .expect("Cannot read seconds since update");
+        let mut reader = Cursor::new(bytes);
+        let seconds_ago = reader.read_u16::<LittleEndian>().unwrap();
+        Duration::from_secs(seconds_ago.into())
+    }
 }
 
 pub struct SensorManager {}
