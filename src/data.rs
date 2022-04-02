@@ -1,3 +1,4 @@
+use crate::SensorError;
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::fmt;
 use std::io::Cursor;
@@ -34,16 +35,16 @@ impl SensorReadings {
         }
     }
     /// construct a `SensorReadings` from a raw bytestream retrieved from the sensor
-    pub(crate) fn from_raw(bytes: Vec<u8>) -> Option<SensorReadings> {
+    pub(crate) fn from_raw(bytes: Vec<u8>) -> Result<SensorReadings, SensorError> {
         let mut reader = Cursor::new(bytes);
-        let co2_level = reader.read_u16::<LittleEndian>().unwrap();
-        let temperature = reader.read_u16::<LittleEndian>().unwrap();
-        let pressure = reader.read_u16::<LittleEndian>().unwrap();
-        let humidity = reader.read_u8().unwrap();
-        let battery = reader.read_u8().unwrap();
-        let status_color = reader.read_u8().unwrap();
+        let co2_level = reader.read_u16::<LittleEndian>()?;
+        let temperature = reader.read_u16::<LittleEndian>()?;
+        let pressure = reader.read_u16::<LittleEndian>()?;
+        let humidity = reader.read_u8()?;
+        let battery = reader.read_u8()?;
+        let status_color = reader.read_u8()?;
 
-        Some(SensorReadings {
+        Ok(SensorReadings {
             co2_level,
             temperature: temperature / 20,
             pressure: pressure / 10,

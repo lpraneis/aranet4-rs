@@ -9,6 +9,7 @@ dependencies = [
  "btleplug",
  "byteorder",
  "rand",
+ "thiserror",
  "tokio",
  "uuid",
 ]

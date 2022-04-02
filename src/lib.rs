@@ -10,15 +10,18 @@ pub use sensor::*;
 pub mod data;
 pub use data::*;
 
+pub mod error;
+pub use error::*;
+
 #[cfg(test)]
 mod tests {
     use crate::*;
 
     #[tokio::test]
     async fn integration() {
-        if let Some(sensor) = SensorManager::init(None).await {
+        if let Ok(sensor) = SensorManager::init(None).await {
             let cur_readings = sensor.read_current_values().await;
-            assert!(cur_readings.is_some());
+            assert!(cur_readings.is_ok());
             println!("Current Readings: {}", cur_readings.unwrap());
             let update_time = sensor.last_update_time().await;
             println!("Last Update Time: {} seconds", update_time.as_secs());
