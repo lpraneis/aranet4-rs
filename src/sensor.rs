@@ -1,15 +1,16 @@
-use btleplug::api::{BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter};
+use btleplug::api::{
+    BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter, WriteType,
+};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use byteorder::{LittleEndian, ReadBytesExt};
+use futures::stream::StreamExt;
 use std::collections::BTreeSet;
 use std::io::Cursor;
 use std::time::Duration;
 use tokio::time;
 use uuid::Uuid;
 
-use crate::data::SensorReadings;
-use crate::error::SensorError;
-pub use crate::protocol::*;
+use crate::{protocol::*, DataRecord, SensorError, SensorReadings};
 
 pub struct Sensor {
     aranet: Peripheral,
@@ -77,6 +78,29 @@ impl Sensor {
             Ok(Duration::from_secs(seconds_ago.into()))
         } else {
             Err(SensorError::CannotFindCharacteristics)
+        }
+    }
+    pub async fn get_historical_data(&self) -> Result<Vec<DataRecord>, SensorError> {
+        let cmd = self.get_characteristic(AranetService::WRITE_CMD);
+        let readings = self.get_characteristic(AranetService::READ_HISTORY_READINGS);
+        match (cmd, readings) {
+            (Some(write_cmd), Some(readings_char)) => {
+                self.aranet
+                    .write(
+                        write_cmd,
+                        &[0x82, 0x01, 0x00, 0x00, 0xde, 0x01, 0x3d, 0x04],
+                        WriteType::WithoutResponse,
+                    )
+                    .await?;
+                self.aranet.subscribe(readings_char).await?;
+                let mut notif_stream = self.aranet.notifications().await?;
+                while let Some(s) = notif_stream.next().await {
+                    println!("{:x?}", s.value);
+                }
+
+                Ok(Vec::new())
+            }
+            (_, _) => Err(SensorError::CannotFindCharacteristics),
         }
     }
 }
