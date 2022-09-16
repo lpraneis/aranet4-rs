@@ -15,4 +15,6 @@ pub enum SensorError {
     ByteReadError(#[from] std::io::Error),
     #[error("Cannot parse bluetooth address: {}", .0)]
     BluetoothAddressParseError(#[from] btleplug::api::ParseBDAddrError),
+    #[error("Protocol Error")]
+    ProtocolError,
 }

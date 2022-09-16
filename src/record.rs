@@ -6,12 +6,14 @@ use chrono;
 use chrono::prelude::*;
 use std::fmt;
 use std::io::Cursor;
+use std::time::Instant;
 
+#[derive(Debug, Default)]
 pub struct DataRecord {
-    temperature: u16,
-    humidity: u8,
-    pressure: u8,
-    co2: u16,
+    pub temperature: f32,
+    pub humidity: u8,
+    pub pressure: f32,
+    pub co2: u16,
 }
 impl fmt::Display for DataRecord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

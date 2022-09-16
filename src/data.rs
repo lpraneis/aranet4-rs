@@ -1,4 +1,4 @@
-use crate::SensorError;
+use crate::{convert_pressure, convert_temperature, SensorError};
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::fmt;
 use std::io::Cursor;
@@ -6,8 +6,8 @@ use std::io::Cursor;
 #[derive(Clone)]
 pub struct SensorReadings {
     co2_level: u16,
-    temperature: u16,
-    pressure: u16,
+    temperature: f32,
+    pressure: f32,
     humidity: u8,
     battery: u8,
     status_color: u8,
@@ -27,8 +27,8 @@ impl SensorReadings {
     pub fn empty() -> SensorReadings {
         SensorReadings {
             co2_level: 0,
-            temperature: 0,
-            pressure: 0,
+            temperature: 0.0,
+            pressure: 0.0,
             humidity: 0,
             battery: 0,
             status_color: 0,
@@ -46,8 +46,8 @@ impl SensorReadings {
 
         Ok(SensorReadings {
             co2_level,
-            temperature: temperature / 20,
-            pressure: pressure / 10,
+            temperature: convert_temperature(temperature),
+            pressure: convert_pressure(pressure),
             humidity,
             battery,
             status_color,
@@ -59,10 +59,10 @@ impl SensorReadings {
     }
     /// Temperature in Fahrenheit
     pub fn temperature(&self) -> f32 {
-        (self.temperature as f32 * 1.8) + 32_f32
+        self.temperature
     }
     /// Pressure in kpa
-    pub fn pressure(&self) -> u16 {
+    pub fn pressure(&self) -> f32 {
         self.pressure
     }
     /// Humidity in percent humidity
