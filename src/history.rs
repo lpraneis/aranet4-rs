@@ -4,8 +4,10 @@ use chrono::Local;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    convert_pressure, convert_temperature, AranetService, DataRecord, LogParameter, Sensor,
-    SensorError,
+    error::SensorError,
+    protocol::{convert_pressure, convert_temperature, AranetService, LogParameter},
+    record::DataRecord,
+    sensor::Sensor,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]

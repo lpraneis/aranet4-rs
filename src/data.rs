@@ -1,7 +1,11 @@
-use crate::{convert_pressure, convert_temperature, SensorError};
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::fmt;
 use std::io::Cursor;
+
+use crate::{
+    error::SensorError,
+    protocol::{convert_pressure, convert_temperature},
+};
 
 #[derive(Clone)]
 pub struct SensorReadings {

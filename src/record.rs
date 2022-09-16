@@ -1,12 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused)]
-use crate::SensorError;
-use byteorder::{LittleEndian, ReadBytesExt};
-use chrono;
-use chrono::prelude::*;
 use std::fmt;
-use std::io::Cursor;
-use std::time::Instant;
 
 #[derive(Debug, Default)]
 pub struct DataRecord {

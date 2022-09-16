@@ -1,5 +1,7 @@
-use btleplug::api::{BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter};
-use btleplug::platform::{Adapter, Manager, Peripheral};
+use btleplug::{
+    api::{BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter},
+    platform::{Adapter, Manager, Peripheral},
+};
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::collections::BTreeSet;
 use std::io::Cursor;
@@ -7,7 +9,7 @@ use std::time::Duration;
 use tokio::time;
 use uuid::Uuid;
 
-use crate::{protocol::*, SensorError, SensorReadings};
+use crate::{data::SensorReadings, error::SensorError, protocol::AranetService};
 
 pub struct Sensor {
     pub(crate) aranet: Peripheral,

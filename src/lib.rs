@@ -1,30 +1,25 @@
 /// UUID and protocol constants
 pub mod protocol;
-pub use protocol::*;
 
 /// Sensor abstraction
 pub mod sensor;
-pub use sensor::*;
 
 /// Sensor Data abstraction
 pub mod data;
-pub use data::*;
 
 pub mod error;
-pub use error::*;
 
 pub mod record;
-pub use record::*;
 
-mod history;
+pub mod history;
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use super::*;
 
     #[tokio::test]
     async fn integration() {
-        let sensor = SensorManager::init(None)
+        let sensor = sensor::SensorManager::init(None)
             .await
             .expect("Cannot create sensor");
         let cur_readings = sensor
