@@ -7,7 +7,7 @@ use crate::{
     protocol::{convert_pressure, convert_temperature},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct SensorReadings {
     co2_level: u16,
     temperature: f32,

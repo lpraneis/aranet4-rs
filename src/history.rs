@@ -53,7 +53,7 @@ impl HistoryRequest {
 
 #[derive(Debug, Clone)]
 pub struct HistoryInformation {
-    interval: chrono::Duration,
+    pub interval: chrono::Duration,
     beginning: chrono::DateTime<Local>,
 }
 impl From<HistoryHeader> for HistoryInformation {
