@@ -1,101 +1,18 @@
-use btleplug::api::{Characteristic, Peripheral, WriteType};
-use chrono::Local;
-
-use serde::{Deserialize, Serialize};
-
+use self::{
+    header::{HistoryHeader, HISTORY_HEADER_SIZE},
+    readings::{HistoryInformation, HistoryReadings, HistoryRequest},
+};
 use crate::{
     error::SensorError,
-    protocol::{convert_pressure, convert_temperature, AranetService, LogParameter},
-    record::DataRecord,
-    sensor::Sensor,
+    sensor::{
+        protocol::{convert_pressure, convert_temperature, AranetService, LogParameter},
+        Sensor,
+    },
 };
-
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
-pub(crate) struct HistoryHeader {
-    pub parameter: LogParameter,
-    pub interval: u16,
-    pub total_measurements: u16,
-    pub time_since_last_measurement: u16,
-    pub first_measure_index: u16,
-    pub num_measurements: u8,
-}
-
-impl HistoryHeader {
-    pub fn decode(data: &[u8]) -> Option<Self> {
-        bincode::deserialize(data).ok()
-    }
-    fn get_data_start(&self) -> Option<chrono::DateTime<Local>> {
-        let beginning = chrono::Local::now();
-        let time_since_last_measurement =
-            chrono::Duration::seconds(self.time_since_last_measurement.into());
-        let measurement_time = self.interval * self.num_measurements as u16;
-        let measure_range = chrono::Duration::seconds(measurement_time.into());
-        beginning
-            .checked_sub_signed(time_since_last_measurement)?
-            .checked_sub_signed(measure_range)
-    }
-}
-pub(crate) const HISTORY_HEADER_SIZE: usize = std::mem::size_of::<HistoryHeader>();
-
-#[derive(Debug, Serialize)]
-pub(crate) struct HistoryRequest {
-    pub parameter: LogParameter,
-    pub first_index: u16,
-}
-
-impl HistoryRequest {
-    pub fn encode(&self) -> Vec<u8> {
-        let mut data: Vec<u8> = vec![0x61];
-        data.extend(bincode::serialize(self).unwrap());
-        data
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct HistoryInformation {
-    pub interval: chrono::Duration,
-    beginning: chrono::DateTime<Local>,
-}
-impl From<HistoryHeader> for HistoryInformation {
-    fn from(header: HistoryHeader) -> Self {
-        let interval = chrono::Duration::seconds(header.interval.into());
-        let beginning = header.get_data_start().unwrap_or_else(chrono::Local::now);
-        Self {
-            interval,
-            beginning,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct HistoryReadings {
-    pub information: HistoryInformation,
-    pub temperature: Vec<f32>,
-    pub humidity: Vec<u8>,
-    pub co2: Vec<u16>,
-    pub pressure: Vec<f32>,
-}
-
-impl HistoryReadings {
-    /// Get a view of the data as a vector of [`DataRecord`]
-    pub fn as_records(&self) -> Vec<DataRecord> {
-        self.temperature
-            .iter()
-            .zip(self.humidity.iter())
-            .zip(self.co2.iter())
-            .zip(self.pressure.iter())
-            .map(|tup| {
-                let (((temperature, humidity), co2), pressure) = tup;
-                DataRecord {
-                    temperature: *temperature,
-                    humidity: *humidity,
-                    pressure: *pressure,
-                    co2: *co2,
-                }
-            })
-            .collect()
-    }
-}
+use btleplug::api::{Characteristic, Peripheral, WriteType};
+mod header;
+pub mod readings;
+pub mod record;
 
 impl Sensor {
     async fn get_temperature_history(

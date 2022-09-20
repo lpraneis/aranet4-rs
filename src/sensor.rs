@@ -1,3 +1,5 @@
+//! Sensor abstractions
+use crate::{error::SensorError, readings::SensorReadings};
 use btleplug::{
     api::{BDAddr, Central, Characteristic, Manager as _, Peripheral as _, ScanFilter},
     platform::{Adapter, Manager, Peripheral},
@@ -9,7 +11,8 @@ use std::time::Duration;
 use tokio::time;
 use uuid::Uuid;
 
-use crate::{data::SensorReadings, error::SensorError, protocol::AranetService};
+pub(crate) mod protocol;
+use protocol::AranetService;
 
 pub struct Sensor {
     pub(crate) aranet: Peripheral,

@@ -1,3 +1,4 @@
+#![allow(unused)]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use uuid::Uuid;
@@ -44,9 +45,11 @@ pub enum LogParameter {
     Co2 = 4,
 }
 
+/// Convert a temperature from u16 representation to Fahrenheit
 pub(crate) fn convert_temperature(temp: u16) -> f32 {
     (temp as f32 / 20.0) * 1.8 + 32_f32
 }
+/// Convert a pressure from u16 representation
 pub(crate) fn convert_pressure(pressure: u16) -> f32 {
     pressure as f32 / 10.0
 }

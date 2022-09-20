@@ -4,16 +4,22 @@ use std::io::Cursor;
 
 use crate::{
     error::SensorError,
-    protocol::{convert_pressure, convert_temperature},
+    sensor::protocol::{convert_pressure, convert_temperature},
 };
 
+/// One-time readings from sensor
 #[derive(Clone, Default)]
 pub struct SensorReadings {
-    co2_level: u16,
-    temperature: f32,
-    pressure: f32,
-    humidity: u8,
-    battery: u8,
+    /// CO2 level, expressed in ppm
+    pub co2_level: u16,
+    /// Temperature in Fahrenheit
+    pub temperature: f32,
+    /// Pressure in kpa
+    pub pressure: f32,
+    /// Humidity in percent humidity
+    pub humidity: u8,
+    /// Battery percent
+    pub battery: u8,
     status_color: u8,
 }
 impl fmt::Display for SensorReadings {
@@ -27,17 +33,6 @@ impl fmt::Display for SensorReadings {
 }
 
 impl SensorReadings {
-    /// construct an empty set of readings. Can be used for displays, etc.
-    pub fn empty() -> SensorReadings {
-        SensorReadings {
-            co2_level: 0,
-            temperature: 0.0,
-            pressure: 0.0,
-            humidity: 0,
-            battery: 0,
-            status_color: 0,
-        }
-    }
     /// construct a `SensorReadings` from a raw bytestream retrieved from the sensor
     pub(crate) fn from_raw(bytes: Vec<u8>) -> Result<SensorReadings, SensorError> {
         let mut reader = Cursor::new(bytes);
@@ -56,25 +51,5 @@ impl SensorReadings {
             battery,
             status_color,
         })
-    }
-    /// CO2 level, expressed in ppm
-    pub fn co2_level(&self) -> u16 {
-        self.co2_level
-    }
-    /// Temperature in Fahrenheit
-    pub fn temperature(&self) -> f32 {
-        self.temperature
-    }
-    /// Pressure in kpa
-    pub fn pressure(&self) -> f32 {
-        self.pressure
-    }
-    /// Humidity in percent humidity
-    pub fn humidity(&self) -> u8 {
-        self.humidity
-    }
-    /// Battery percent
-    pub fn battery(&self) -> u8 {
-        self.battery
     }
 }

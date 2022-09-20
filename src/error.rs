@@ -1,3 +1,4 @@
+//! Error type for sensor readings
 use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum SensorError {

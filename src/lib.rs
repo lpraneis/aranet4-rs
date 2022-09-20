@@ -1,17 +1,7 @@
-/// UUID and protocol constants
-pub mod protocol;
-
-/// Sensor abstraction
-pub mod sensor;
-
-/// Sensor Data abstraction
-pub mod data;
-
 pub mod error;
-
-pub mod record;
-
 pub mod history;
+pub mod readings;
+pub mod sensor;
 
 #[cfg(test)]
 mod tests {
