@@ -25,8 +25,8 @@ impl HistoryHeader {
         let beginning = chrono::Local::now();
         let time_since_last_measurement =
             chrono::Duration::seconds(self.time_since_last_measurement.into());
-        let measurement_time = self.interval * self.num_measurements as u16;
-        let measure_range = chrono::Duration::seconds(measurement_time.into());
+        let measurement_time = self.interval as i64 * self.num_measurements as i64;
+        let measure_range = chrono::Duration::seconds(measurement_time);
         beginning
             .checked_sub_signed(time_since_last_measurement)?
             .checked_sub_signed(measure_range)
