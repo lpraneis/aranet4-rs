@@ -1,3 +1,11 @@
+[![Crates.io][crates-badge]][crates-url]
+[![Documentation][docs-badge]][docs-url]
+
+[crates-badge]: https://img.shields.io/crates/v/aranet4.svg
+[crates-url]: https://crates.io/crates/aranet4
+[docs-badge]: https://docs.rs/aranet4/badge.svg
+[docs-url]: https://docs.rs/aranet4
+
 # aranet4-rs
 
 A rust library for the Aranet4 CO2 Sensor
