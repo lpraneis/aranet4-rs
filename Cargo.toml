@@ -3,6 +3,11 @@ name = "aranet4"
 version = "0.1.0"
 edition = "2021"
 authors = ["Logan Praneis <lpraneis@gmail.com>"]
+repository = "https://github.com/lpraneis/aranet4-rs"
+license-file = "LICENSE"
+keywords = ["aranet", "co2"]
+description = "Read current and historical measurements from an Aranet4 CO2 Monitor over bluetooth"
+
 
 [dependencies]
 btleplug = "0.9.1"
